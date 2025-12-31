@@ -115,13 +115,13 @@ body {
   justify-content: space-between;
   gap: 24px;
   padding: 18px 24px;
+  padding-bottom: 24px;
   background: var(--card-bg);
   border-radius: var(--radius);
   box-shadow: 0 10px 25px var(--shadow);
   position: sticky;
   top: 16px;
   z-index: 5;
-  flex-wrap: wrap;
 }
 
 h1,
@@ -173,30 +173,57 @@ p {
   font-size: 0.95rem;
 }
 
-.header-actions {
+.settings-toggle {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 16px;
+  padding: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  cursor: pointer;
   display: flex;
-  gap: 12px;
   align-items: center;
-  flex-wrap: wrap;
-  position: relative;
+  justify-content: center;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.settings-toggle:hover {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.settings-toggle .chevron-icon {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.3s ease;
+}
+
+.settings-toggle[aria-expanded="true"] .chevron-icon {
+  transform: rotate(180deg);
 }
 
 .settings-panel {
-  position: fixed;
-  top: auto;
-  right: 24px;
   display: none;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 12px;
+  align-items: center;
+  justify-content: center;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 12px 28px var(--shadow);
-  z-index: 100;
-  min-width: 200px;
-  width: auto;
-  max-width: calc(100vw - 48px);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  box-shadow: 0 8px 20px var(--shadow);
+  margin-top: -8px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
 }
 
 .settings-panel[hidden] {
@@ -205,17 +232,25 @@ p {
 
 .settings-panel.is-open {
   display: flex;
-  animation: fadeSlideIn 0.2s ease forwards;
+  max-height: 200px;
+  opacity: 1;
+  animation: slideDown 0.3s ease forwards;
 }
 
-@keyframes fadeSlideIn {
+@keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    max-height: 200px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    margin-top: -8px;
   }
 }
 
@@ -616,6 +651,7 @@ select {
     flex-direction: row;
     align-items: center;
     padding: 14px 16px;
+    padding-bottom: 20px;
     gap: 12px;
   }
 
@@ -627,15 +663,20 @@ select {
     display: none;
   }
 
-  .header-actions {
-    margin-left: auto;
+  .settings-toggle {
+    bottom: -10px;
+    width: 28px;
+    height: 14px;
+  }
+
+  .settings-toggle .chevron-icon {
+    width: 12px;
+    height: 12px;
   }
 
   .settings-panel {
-    right: 16px !important;
-    left: 16px !important;
-    min-width: auto;
-    max-width: none;
+    padding: 12px 16px;
+    gap: 10px;
   }
 
   .step-row {

@@ -162,6 +162,7 @@ const translations = {
     selectRoutine: "Select a routine to begin",
     start: "Start",
     pause: "Pause",
+    resume: "Resume",
     reset: "Reset",
     builderTitle: "Routine Builder",
     newRoutineStatus: "New routine",
@@ -229,6 +230,7 @@ const translations = {
     selectRoutine: "Selecciona una rutina para comenzar",
     start: "Iniciar",
     pause: "Pausar",
+    resume: "Reanudar",
     reset: "Reiniciar",
     builderTitle: "Creador de rutinas",
     newRoutineStatus: "Nueva rutina",
@@ -454,6 +456,7 @@ function startCycle() {
   }
 
   animationState = { running: true, cycleIndex, stepIndex, elapsed, repsLeft };
+  updateControlButtons();
 
   function tick(timestamp) {
     if (!animationState || !animationState.running) return;
@@ -528,6 +531,7 @@ function pauseCycle() {
   if (animationState) {
     animationState.running = false;
     updateNowPlaying();
+    updateControlButtons();
   }
 }
 
@@ -539,6 +543,28 @@ function resetCycle() {
   holdCounter.textContent = "";
   updateMaxScaleCache();
   updateNowPlaying();
+  updateControlButtons();
+}
+
+function updateControlButtons() {
+  if (!startBtn || !pauseBtn) return;
+
+  if (!animationState) {
+    // No session - show Start, hide Pause
+    startBtn.textContent = t("start");
+    startBtn.style.display = "";
+    pauseBtn.style.display = "none";
+  } else if (animationState.running) {
+    // Running - hide Start, show Pause
+    startBtn.style.display = "none";
+    pauseBtn.style.display = "";
+    pauseBtn.textContent = t("pause");
+  } else {
+    // Paused - show Resume, hide Pause
+    startBtn.textContent = t("resume");
+    startBtn.style.display = "";
+    pauseBtn.style.display = "none";
+  }
 }
 
 function getMaxScale() {
@@ -575,6 +601,7 @@ function finishSession() {
   cycleMeta.textContent = t("sessionComplete");
   holdCounter.textContent = "";
   updateNowPlaying();
+  updateControlButtons();
 }
 
 function normalizeRoutine(routine) {
@@ -924,12 +951,4 @@ function openSettingsPanel() {
   settingsPanel.classList.add("is-open");
   settingsPanel.removeAttribute("hidden");
   settingsToggle.setAttribute("aria-expanded", "true");
-  positionSettingsPanel();
-}
-
-function positionSettingsPanel() {
-  if (!settingsPanel || !settingsToggle) return;
-  const rect = settingsToggle.getBoundingClientRect();
-  settingsPanel.style.top = `${rect.bottom + 8}px`;
-  settingsPanel.style.right = `${window.innerWidth - rect.right}px`;
 }
