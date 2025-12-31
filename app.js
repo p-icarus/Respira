@@ -72,27 +72,17 @@ function playPhaseSound(phase) {
 // - Verywell Mind (verywellmind.com)
 // - Mayo Clinic (mayoclinic.org)
 
+// Categories for organizing routines
+const ROUTINE_CATEGORIES = [
+  { id: "sleep", name: "Sleep", nameKey: "categorySleep", icon: "moon" },
+  { id: "anxiety", name: "Stress & Anxiety", nameKey: "categoryAnxiety", icon: "heart" },
+  { id: "focus", name: "Focus & Energy", nameKey: "categoryFocus", icon: "zap" },
+  { id: "recovery", name: "Recovery", nameKey: "categoryRecovery", icon: "activity" },
+  { id: "custom", name: "My Routines", nameKey: "categoryCustom", icon: "user" }
+];
+
 const DEFAULT_ROUTINES = [
-  // Box Breathing - Used by Navy SEALs for focus and stress management
-  // Source: Cleveland Clinic, Healthline
-  {
-    id: crypto.randomUUID(),
-    name: "Box Breathing (Navy SEALs)",
-    nameKey: "routineNameBoxBreathing",
-    scenario: "awake",
-    scenarioKey: "scenarioAwake",
-    cycles: [
-      {
-        repetitions: 4,
-        steps: [
-          { type: "inhale", duration: 4 },
-          { type: "hold", duration: 4 },
-          { type: "exhale", duration: 4, exhaleVia: "mouth" },
-          { type: "hold", duration: 4 }
-        ]
-      }
-    ]
-  },
+  // === SLEEP ROUTINES ===
   // 4-7-8 Breathing - Dr. Andrew Weil's relaxation technique
   // Source: Medical News Today, Cleveland Clinic, Sleep Foundation
   {
@@ -101,6 +91,7 @@ const DEFAULT_ROUTINES = [
     nameKey: "routineNameRelaxingBreath",
     scenario: "fall asleep",
     scenarioKey: "scenarioFallAsleep",
+    category: "sleep",
     cycles: [
       {
         repetitions: 4,
@@ -112,20 +103,22 @@ const DEFAULT_ROUTINES = [
       }
     ]
   },
-  // Coherent/Resonant Breathing - 5-5 pattern for HRV optimization
-  // Source: Healthline, Psychology Today, research journals
+  // Deep Sleep Prep - Extended 4-7-8 for insomnia
+  // Source: Sleep Foundation, Medical News Today
   {
     id: crypto.randomUUID(),
-    name: "Coherent Breathing (5-5)",
-    nameKey: "routineNameCoherentBreathing",
-    scenario: "anxiety",
-    scenarioKey: "scenarioAnxiety",
+    name: "Deep Sleep Prep",
+    nameKey: "routineNameDeepSleepPrep",
+    scenario: "fall asleep",
+    scenarioKey: "scenarioFallAsleep",
+    category: "sleep",
     cycles: [
       {
         repetitions: 6,
         steps: [
-          { type: "inhale", duration: 5 },
-          { type: "exhale", duration: 5, exhaleVia: "nose" }
+          { type: "inhale", duration: 4 },
+          { type: "hold", duration: 7 },
+          { type: "exhale", duration: 8, exhaleVia: "mouth" }
         ]
       }
     ]
@@ -138,49 +131,13 @@ const DEFAULT_ROUTINES = [
     nameKey: "routineNameResonantBreathing",
     scenario: "wind down",
     scenarioKey: "scenarioWindDown",
+    category: "sleep",
     cycles: [
       {
         repetitions: 5,
         steps: [
           { type: "inhale", duration: 6 },
           { type: "exhale", duration: 6, exhaleVia: "nose" }
-        ]
-      }
-    ]
-  },
-  // Pursed Lip Breathing - COPD and exercise recovery
-  // Source: Cleveland Clinic, American Lung Association, COPD Foundation
-  {
-    id: crypto.randomUUID(),
-    name: "Pursed Lip Breathing",
-    nameKey: "routineNamePursedLip",
-    scenario: "exercise",
-    scenarioKey: "scenarioExercise",
-    cycles: [
-      {
-        repetitions: 6,
-        steps: [
-          { type: "inhale", duration: 2 },
-          { type: "exhale", duration: 4, exhaleVia: "mouth" }
-        ]
-      }
-    ]
-  },
-  // Physiological Sigh - Stanford research for instant stress relief
-  // Source: Stanford Medicine, Huberman Lab
-  {
-    id: crypto.randomUUID(),
-    name: "Physiological Sigh",
-    nameKey: "routineNamePhysiologicalSigh",
-    scenario: "anxiety",
-    scenarioKey: "scenarioAnxiety",
-    cycles: [
-      {
-        repetitions: 3,
-        steps: [
-          { type: "inhale", duration: 2 },
-          { type: "inhale", duration: 1 },
-          { type: "exhale", duration: 6, exhaleVia: "mouth" }
         ]
       }
     ]
@@ -193,6 +150,7 @@ const DEFAULT_ROUTINES = [
     nameKey: "routineNameTwoToOne",
     scenario: "wind down",
     scenarioKey: "scenarioWindDown",
+    category: "sleep",
     cycles: [
       {
         repetitions: 6,
@@ -203,19 +161,42 @@ const DEFAULT_ROUTINES = [
       }
     ]
   },
-  // Diaphragmatic/Belly Breathing - Core relaxation technique
-  // Source: Cleveland Clinic, Harvard Health, Mayo Clinic
+
+  // === STRESS & ANXIETY ROUTINES ===
+  // Coherent/Resonant Breathing - 5-5 pattern for HRV optimization
+  // Source: Healthline, Psychology Today, research journals
   {
     id: crypto.randomUUID(),
-    name: "Diaphragmatic Breathing",
-    nameKey: "routineNameDiaphragmatic",
-    scenario: "awake",
-    scenarioKey: "scenarioAwake",
+    name: "Coherent Breathing (5-5)",
+    nameKey: "routineNameCoherentBreathing",
+    scenario: "anxiety",
+    scenarioKey: "scenarioAnxiety",
+    category: "anxiety",
     cycles: [
       {
-        repetitions: 5,
+        repetitions: 6,
         steps: [
-          { type: "inhale", duration: 4 },
+          { type: "inhale", duration: 5 },
+          { type: "exhale", duration: 5, exhaleVia: "nose" }
+        ]
+      }
+    ]
+  },
+  // Physiological Sigh - Stanford research for instant stress relief
+  // Source: Stanford Medicine, Huberman Lab
+  {
+    id: crypto.randomUUID(),
+    name: "Physiological Sigh",
+    nameKey: "routineNamePhysiologicalSigh",
+    scenario: "anxiety",
+    scenarioKey: "scenarioAnxiety",
+    category: "anxiety",
+    cycles: [
+      {
+        repetitions: 3,
+        steps: [
+          { type: "inhale", duration: 2 },
+          { type: "inhale", duration: 1 },
           { type: "exhale", duration: 6, exhaleVia: "mouth" }
         ]
       }
@@ -229,6 +210,7 @@ const DEFAULT_ROUTINES = [
     nameKey: "routineNameCalming4462",
     scenario: "anxiety",
     scenarioKey: "scenarioAnxiety",
+    category: "anxiety",
     cycles: [
       {
         repetitions: 4,
@@ -241,6 +223,89 @@ const DEFAULT_ROUTINES = [
       }
     ]
   },
+  // Anxiety Emergency - Quick calming for acute stress
+  // Source: NHS UK, Anxiety UK
+  {
+    id: crypto.randomUUID(),
+    name: "Anxiety Emergency",
+    nameKey: "routineNameAnxietyEmergency",
+    scenario: "anxiety",
+    scenarioKey: "scenarioAnxiety",
+    category: "anxiety",
+    cycles: [
+      {
+        repetitions: 5,
+        steps: [
+          { type: "inhale", duration: 4 },
+          { type: "hold", duration: 2 },
+          { type: "exhale", duration: 6, exhaleVia: "mouth" }
+        ]
+      }
+    ]
+  },
+  // Diaphragmatic/Belly Breathing - Core relaxation technique
+  // Source: Cleveland Clinic, Harvard Health, Mayo Clinic
+  {
+    id: crypto.randomUUID(),
+    name: "Diaphragmatic Breathing",
+    nameKey: "routineNameDiaphragmatic",
+    scenario: "calm",
+    scenarioKey: "scenarioCalm",
+    category: "anxiety",
+    cycles: [
+      {
+        repetitions: 5,
+        steps: [
+          { type: "inhale", duration: 4 },
+          { type: "exhale", duration: 6, exhaleVia: "mouth" }
+        ]
+      }
+    ]
+  },
+
+  // === FOCUS & ENERGY ROUTINES ===
+  // Box Breathing - Used by Navy SEALs for focus and stress management
+  // Source: Cleveland Clinic, Healthline
+  {
+    id: crypto.randomUUID(),
+    name: "Box Breathing (Navy SEALs)",
+    nameKey: "routineNameBoxBreathing",
+    scenario: "focus",
+    scenarioKey: "scenarioFocus",
+    category: "focus",
+    cycles: [
+      {
+        repetitions: 4,
+        steps: [
+          { type: "inhale", duration: 4 },
+          { type: "hold", duration: 4 },
+          { type: "exhale", duration: 4, exhaleVia: "mouth" },
+          { type: "hold", duration: 4 }
+        ]
+      }
+    ]
+  },
+  // Focus & Concentration - Box variation for mental clarity
+  // Source: Cleveland Clinic, cognitive wellness resources
+  {
+    id: crypto.randomUUID(),
+    name: "Focus & Concentration",
+    nameKey: "routineNameFocusConcentration",
+    scenario: "focus",
+    scenarioKey: "scenarioFocus",
+    category: "focus",
+    cycles: [
+      {
+        repetitions: 4,
+        steps: [
+          { type: "inhale", duration: 5 },
+          { type: "hold", duration: 5 },
+          { type: "exhale", duration: 5, exhaleVia: "nose" },
+          { type: "hold", duration: 5 }
+        ]
+      }
+    ]
+  },
   // Energizing Breath - Shorter pattern to increase alertness
   // Source: Healthline, WebMD
   {
@@ -249,6 +314,7 @@ const DEFAULT_ROUTINES = [
     nameKey: "routineNameEnergizing",
     scenario: "energize",
     scenarioKey: "scenarioEnergize",
+    category: "focus",
     cycles: [
       {
         repetitions: 6,
@@ -267,6 +333,7 @@ const DEFAULT_ROUTINES = [
     nameKey: "routineNameMorningWakeUp",
     scenario: "energize",
     scenarioKey: "scenarioEnergize",
+    category: "focus",
     cycles: [
       {
         repetitions: 5,
@@ -278,40 +345,23 @@ const DEFAULT_ROUTINES = [
       }
     ]
   },
-  // Deep Sleep Prep - Extended 4-7-8 for insomnia
-  // Source: Sleep Foundation, Medical News Today
+
+  // === RECOVERY ROUTINES ===
+  // Pursed Lip Breathing - COPD and exercise recovery
+  // Source: Cleveland Clinic, American Lung Association, COPD Foundation
   {
     id: crypto.randomUUID(),
-    name: "Deep Sleep Prep",
-    nameKey: "routineNameDeepSleepPrep",
-    scenario: "fall asleep",
-    scenarioKey: "scenarioFallAsleep",
+    name: "Pursed Lip Breathing",
+    nameKey: "routineNamePursedLip",
+    scenario: "exercise",
+    scenarioKey: "scenarioExercise",
+    category: "recovery",
     cycles: [
       {
         repetitions: 6,
         steps: [
-          { type: "inhale", duration: 4 },
-          { type: "hold", duration: 7 },
-          { type: "exhale", duration: 8, exhaleVia: "mouth" }
-        ]
-      }
-    ]
-  },
-  // Anxiety Emergency - Quick calming for acute stress
-  // Source: NHS UK, Anxiety UK
-  {
-    id: crypto.randomUUID(),
-    name: "Anxiety Emergency",
-    nameKey: "routineNameAnxietyEmergency",
-    scenario: "anxiety",
-    scenarioKey: "scenarioAnxiety",
-    cycles: [
-      {
-        repetitions: 5,
-        steps: [
-          { type: "inhale", duration: 4 },
-          { type: "hold", duration: 2 },
-          { type: "exhale", duration: 6, exhaleVia: "mouth" }
+          { type: "inhale", duration: 2 },
+          { type: "exhale", duration: 4, exhaleVia: "mouth" }
         ]
       }
     ]
@@ -324,32 +374,13 @@ const DEFAULT_ROUTINES = [
     nameKey: "routineNamePostWorkout",
     scenario: "exercise",
     scenarioKey: "scenarioExercise",
+    category: "recovery",
     cycles: [
       {
         repetitions: 8,
         steps: [
           { type: "inhale", duration: 3 },
           { type: "exhale", duration: 6, exhaleVia: "mouth" }
-        ]
-      }
-    ]
-  },
-  // Focus & Concentration - Box variation for mental clarity
-  // Source: Cleveland Clinic, cognitive wellness resources
-  {
-    id: crypto.randomUUID(),
-    name: "Focus & Concentration",
-    nameKey: "routineNameFocusConcentration",
-    scenario: "awake",
-    scenarioKey: "scenarioAwake",
-    cycles: [
-      {
-        repetitions: 4,
-        steps: [
-          { type: "inhale", duration: 5 },
-          { type: "hold", duration: 5 },
-          { type: "exhale", duration: 5, exhaleVia: "nose" },
-          { type: "hold", duration: 5 }
         ]
       }
     ]
@@ -454,6 +485,21 @@ const translations = {
     routineNameWindDown478: "Wind Down 4-7-8",
     routineNameAnxietyCalm: "Anxiety 5-5 Calm",
     routineNameExerciseRecovery: "Exercise Recovery (Pursed Lip)",
+    routineNameRelaxingBreath: "4-7-8 Relaxing Breath",
+    routineNameDeepSleepPrep: "Deep Sleep Prep",
+    routineNameResonantBreathing: "Resonant Breathing (6-6)",
+    routineNameTwoToOne: "2-to-1 Breathing",
+    routineNameCoherentBreathing: "Coherent Breathing (5-5)",
+    routineNamePhysiologicalSigh: "Physiological Sigh",
+    routineNameCalming4462: "4-4-6-2 Calming",
+    routineNameAnxietyEmergency: "Anxiety Emergency",
+    routineNameDiaphragmatic: "Diaphragmatic Breathing",
+    routineNameBoxBreathing: "Box Breathing (Navy SEALs)",
+    routineNameFocusConcentration: "Focus & Concentration",
+    routineNameEnergizing: "Energizing Breath",
+    routineNameMorningWakeUp: "Morning Wake-Up",
+    routineNamePursedLip: "Pursed Lip Breathing",
+    routineNamePostWorkout: "Post-Workout Recovery",
     scenarioAwake: "awake",
     scenarioEnergize: "energize",
     scenarioFallAsleep: "fall asleep",
@@ -469,7 +515,14 @@ const translations = {
     settingsToggle: "Settings",
     settingsHide: "Hide settings",
     haptics: "Haptics",
-    sound: "Sound"
+    sound: "Sound",
+    categorySleep: "Sleep",
+    categoryAnxiety: "Stress & Anxiety",
+    categoryFocus: "Focus & Energy",
+    categoryRecovery: "Recovery",
+    categoryCustom: "My Routines",
+    scenarioFocus: "focus",
+    scenarioCalm: "calm"
   },
   es: {
     headerSubtitle: "Rutinas de respiración inspiradas en la tierra para enfoque, calma y recuperación.",
@@ -524,6 +577,21 @@ const translations = {
     routineNameWindDown478: "Relajación 4-7-8",
     routineNameAnxietyCalm: "Calma 5-5",
     routineNameExerciseRecovery: "Recuperación (labios fruncidos)",
+    routineNameRelaxingBreath: "Respiración Relajante 4-7-8",
+    routineNameDeepSleepPrep: "Preparación para Dormir",
+    routineNameResonantBreathing: "Respiración Resonante (6-6)",
+    routineNameTwoToOne: "Respiración 2-a-1",
+    routineNameCoherentBreathing: "Respiración Coherente (5-5)",
+    routineNamePhysiologicalSigh: "Suspiro Fisiológico",
+    routineNameCalming4462: "Calmante 4-4-6-2",
+    routineNameAnxietyEmergency: "Emergencia de Ansiedad",
+    routineNameDiaphragmatic: "Respiración Diafragmática",
+    routineNameBoxBreathing: "Respiración en Caja (Navy SEALs)",
+    routineNameFocusConcentration: "Enfoque y Concentración",
+    routineNameEnergizing: "Respiración Energizante",
+    routineNameMorningWakeUp: "Despertar Matutino",
+    routineNamePursedLip: "Respiración con Labios Fruncidos",
+    routineNamePostWorkout: "Recuperación Post-Ejercicio",
     scenarioAwake: "despierto",
     scenarioEnergize: "energía",
     scenarioFallAsleep: "dormir",
@@ -539,7 +607,14 @@ const translations = {
     settingsToggle: "Ajustes",
     settingsHide: "Ocultar ajustes",
     haptics: "Vibración",
-    sound: "Sonido"
+    sound: "Sonido",
+    categorySleep: "Sueño",
+    categoryAnxiety: "Estrés y Ansiedad",
+    categoryFocus: "Enfoque y Energía",
+    categoryRecovery: "Recuperación",
+    categoryCustom: "Mis Rutinas",
+    scenarioFocus: "enfoque",
+    scenarioCalm: "calma"
   }
 };
 
@@ -563,57 +638,122 @@ function saveRoutines() {
   renderRoutineList();
 }
 
+function getCategoryIcon(iconName) {
+  const icons = {
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+    heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+    zap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    activity: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+  };
+  return icons[iconName] || icons.user;
+}
+
+function getCategoryName(category) {
+  const cat = ROUTINE_CATEGORIES.find(c => c.id === category.id);
+  if (cat && cat.nameKey && translations[currentLang] && translations[currentLang][cat.nameKey]) {
+    return translations[currentLang][cat.nameKey];
+  }
+  return category.name;
+}
+
+function renderRoutineCard(routine) {
+  const card = document.createElement("div");
+  card.className = "routine-card";
+  if (routine.id === activeRoutineId) {
+    card.classList.add("active");
+  }
+  card.dataset.routineId = routine.id;
+
+  const title = document.createElement("strong");
+  title.textContent = getRoutineName(routine);
+  const scenario = document.createElement("span");
+  scenario.className = "muted";
+  scenario.textContent = getRoutineScenario(routine);
+
+  const tagWrap = document.createElement("div");
+  tagWrap.className = "routine-tags";
+  const cyclesTag = document.createElement("span");
+  cyclesTag.className = "tag";
+  const cycles = getRoutineCycles(routine);
+  cyclesTag.textContent = t("cyclesCount", { count: cycles.length });
+  tagWrap.appendChild(cyclesTag);
+
+  cycles.forEach((cycle) => {
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.textContent = t("repsTag", { count: getCycleRepetitions(cycle) });
+    tagWrap.appendChild(tag);
+  });
+
+  card.appendChild(title);
+  card.appendChild(scenario);
+  card.appendChild(tagWrap);
+  const actions = document.createElement("div");
+  actions.className = "routine-actions";
+  const startButton = document.createElement("button");
+  startButton.type = "button";
+  startButton.className = "primary";
+  startButton.dataset.action = "start";
+  startButton.textContent = t("startRoutine");
+  const editButton = document.createElement("button");
+  editButton.type = "button";
+  editButton.className = "ghost";
+  editButton.dataset.action = "edit";
+  editButton.textContent = t("editRoutine");
+  actions.appendChild(startButton);
+  actions.appendChild(editButton);
+  card.appendChild(actions);
+
+  return card;
+}
+
 function renderRoutineList() {
   routineList.innerHTML = "";
+
+  // Group routines by category
+  const groupedRoutines = {};
   routines.forEach((routine) => {
-    const card = document.createElement("div");
-    card.className = "routine-card";
-    if (routine.id === activeRoutineId) {
-      card.classList.add("active");
+    const category = routine.category || "custom";
+    if (!groupedRoutines[category]) {
+      groupedRoutines[category] = [];
     }
-    card.dataset.routineId = routine.id;
+    groupedRoutines[category].push(routine);
+  });
 
-    const title = document.createElement("strong");
-    title.textContent = getRoutineName(routine);
-    const scenario = document.createElement("span");
-    scenario.className = "muted";
-    scenario.textContent = getRoutineScenario(routine);
+  // Render each category
+  ROUTINE_CATEGORIES.forEach((category) => {
+    const categoryRoutines = groupedRoutines[category.id];
+    if (!categoryRoutines || categoryRoutines.length === 0) return;
 
-    const tagWrap = document.createElement("div");
-    tagWrap.className = "routine-tags";
-    const cyclesTag = document.createElement("span");
-    cyclesTag.className = "tag";
-    const cycles = getRoutineCycles(routine);
-    cyclesTag.textContent = t("cyclesCount", { count: cycles.length });
-    tagWrap.appendChild(cyclesTag);
+    const folder = document.createElement("div");
+    folder.className = "routine-folder";
+    folder.dataset.category = category.id;
 
-    cycles.forEach((cycle) => {
-      const tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = t("repsTag", { count: getCycleRepetitions(cycle) });
-      tagWrap.appendChild(tag);
+    const header = document.createElement("button");
+    header.type = "button";
+    header.className = "folder-header";
+    header.innerHTML = `
+      <span class="folder-icon">${getCategoryIcon(category.icon)}</span>
+      <span class="folder-name">${getCategoryName(category)}</span>
+      <span class="folder-count">${categoryRoutines.length}</span>
+      <svg class="folder-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    `;
+
+    const content = document.createElement("div");
+    content.className = "folder-content";
+
+    categoryRoutines.forEach((routine) => {
+      content.appendChild(renderRoutineCard(routine));
     });
 
-    card.appendChild(title);
-    card.appendChild(scenario);
-    card.appendChild(tagWrap);
-    const actions = document.createElement("div");
-    actions.className = "routine-actions";
-    const startButton = document.createElement("button");
-    startButton.type = "button";
-    startButton.className = "primary";
-    startButton.dataset.action = "start";
-    startButton.textContent = t("startRoutine");
-    const editButton = document.createElement("button");
-    editButton.type = "button";
-    editButton.className = "ghost";
-    editButton.dataset.action = "edit";
-    editButton.textContent = t("editRoutine");
-    actions.appendChild(startButton);
-    actions.appendChild(editButton);
-    card.appendChild(actions);
+    header.addEventListener("click", () => {
+      folder.classList.toggle("is-collapsed");
+    });
 
-    routineList.appendChild(card);
+    folder.appendChild(header);
+    folder.appendChild(content);
+    routineList.appendChild(folder);
   });
 
   routineCount.textContent = t("totalCount", { count: routines.length });
