@@ -1,0 +1,15 @@
+{
+  "name": "Respira",
+  "short_name": "Respira",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f6faf4",
+  "theme_color": "#6b8f78",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

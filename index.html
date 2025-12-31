@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#6b8f78" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Respira</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div>
+          <h1>Respira</h1>
+          <p data-i18n="headerSubtitle">Terra-inspired breathing routines for focus, calm, and recovery.</p>
+        </div>
+        <div class="header-actions">
+          <label class="theme-select">
+            <span data-i18n="themeLabel">Theme</span>
+            <select id="themeSelect">
+              <option value="sage">Sage</option>
+              <option value="dune">Dune</option>
+              <option value="mist">Mist</option>
+            </select>
+          </label>
+          <label class="lang-select">
+            <span data-i18n="languageLabel">Language</span>
+            <select id="languageSelect">
+              <option value="en">English</option>
+              <option value="es">Espanol</option>
+            </select>
+          </label>
+          <button id="newRoutineBtn" class="ghost" data-i18n="newRoutine">New routine</button>
+          <button id="seedDataBtn" class="ghost" data-i18n="resetSamples">Reset samples</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel panel-list">
+          <div class="panel-header">
+            <h2 data-i18n="routinesTitle">Routines</h2>
+            <span id="routineCount" class="muted"></span>
+          </div>
+          <div id="routineList" class="routine-list"></div>
+        </section>
+
+        <section class="panel panel-visual">
+          <div class="panel-header">
+            <h2 data-i18n="breathingTitle">Breathing</h2>
+            <span id="activeRoutineName" class="muted" data-i18n="noRoutineSelected">No routine selected</span>
+          </div>
+          <div class="visual-wrap">
+            <div class="circle-shell" id="circleShell">
+              <div class="circle-core" id="breathCircle">
+                <span id="holdCounter" class="hold-counter"></span>
+              </div>
+            </div>
+            <div class="cycle-info">
+              <div id="cyclePhase" class="phase" data-i18n="selectRoutine">Select a routine to begin</div>
+              <div id="cycleMeta" class="muted"></div>
+            </div>
+            <div class="controls">
+              <button id="startBtn" class="primary" data-i18n="start">Start</button>
+              <button id="pauseBtn" class="ghost" data-i18n="pause">Pause</button>
+              <button id="resetBtn" class="ghost" data-i18n="reset">Reset</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel panel-editor">
+          <div class="panel-header">
+            <h2 data-i18n="builderTitle">Routine Builder</h2>
+            <span id="editorStatus" class="muted" data-i18n="newRoutineStatus">New routine</span>
+          </div>
+          <form id="routineForm" class="routine-form">
+            <label>
+              <span data-i18n="routineNameLabel">Routine name</span>
+              <input id="routineName" type="text" placeholder="Evening wind down" data-i18n-placeholder="routineNamePlaceholder" required />
+            </label>
+            <label>
+              <span data-i18n="scenarioLabel">Scenario</span>
+              <input id="routineScenario" type="text" placeholder="wind down" data-i18n-placeholder="scenarioPlaceholder" required />
+            </label>
+            <div class="steps-header">
+              <span data-i18n="stepsTitle">Steps</span>
+              <button type="button" id="addStepBtn" class="ghost" data-i18n="addCycle">Add cycle</button>
+            </div>
+            <div id="cyclesList" class="cycles-list"></div>
+            <div class="form-actions">
+              <button type="submit" class="primary" data-i18n="saveRoutine">Save routine</button>
+              <button type="button" id="deleteRoutineBtn" class="ghost" data-i18n="deleteRoutine">Delete routine</button>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <template id="stepTemplate">
+      <div class="step-row">
+        <select class="step-type">
+          <option value="inhale" data-i18n="inhale">Inhale</option>
+          <option value="exhale" data-i18n="exhale">Exhale</option>
+          <option value="hold" data-i18n="hold">Hold</option>
+        </select>
+        <input class="step-duration" type="number" min="1" value="4" />
+        <select class="step-exhale">
+          <option value="nose" data-i18n="exhaleNose">Exhale nose</option>
+          <option value="mouth" data-i18n="exhaleMouth">Exhale mouth</option>
+        </select>
+        <button type="button" class="ghost step-remove" data-i18n="removeStep">Remove</button>
+      </div>
+    </template>
+
+    <template id="cycleTemplate">
+      <div class="cycle-card">
+        <div class="cycle-header">
+          <span data-i18n="cycleLabel">Cycle</span>
+          <label class="cycle-reps">
+            <span data-i18n="repetitionsLabel">Repetitions</span>
+            <input class="cycle-repetitions" type="number" min="1" value="4" />
+          </label>
+          <button type="button" class="ghost cycle-remove" data-i18n="removeCycle">Remove cycle</button>
+        </div>
+        <div class="steps-labels">
+          <span data-i18n="typeLabel">Type</span>
+          <span data-i18n="secondsLabel">Seconds</span>
+          <span data-i18n="exhaleLabel">Exhale</span>
+          <span></span>
+        </div>
+        <div class="steps-list"></div>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
