@@ -1,4 +1,129 @@
 const STORAGE_KEY = "respira:routines";
+const HAPTICS_KEY = "respira:haptics";
+const SOUND_KEY = "respira:sound";
+
+// Wake Lock API - prevent screen from sleeping during sessions
+let wakeLock = null;
+
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null;
+      });
+    } catch (err) {
+      console.warn('Wake lock request failed:', err);
+    }
+  }
+}
+
+function releaseWakeLock() {
+  if (wakeLock) {
+    wakeLock.release();
+    wakeLock = null;
+  }
+}
+
+// Re-request wake lock when page becomes visible again
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && animationState && animationState.running) {
+    requestWakeLock();
+  }
+});
+
+// Haptic feedback
+function triggerHaptic(style = 'medium') {
+  if (!isHapticsEnabled()) return;
+
+  if ('vibrate' in navigator) {
+    const patterns = {
+      light: [10],
+      medium: [20],
+      heavy: [30],
+      double: [15, 50, 15],
+      success: [10, 30, 10, 30, 20]
+    };
+    navigator.vibrate(patterns[style] || patterns.medium);
+  }
+}
+
+function isHapticsEnabled() {
+  return localStorage.getItem(HAPTICS_KEY) !== 'false';
+}
+
+function isSoundEnabled() {
+  return localStorage.getItem(SOUND_KEY) !== 'false';
+}
+
+// Audio context and sounds
+let audioContext = null;
+
+function getAudioContext() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioContext;
+}
+
+function playTone(frequency, duration, type = 'sine', volume = 0.15) {
+  if (!isSoundEnabled()) return;
+
+  try {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+
+    // Fade in
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.05);
+
+    // Fade out
+    gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
+
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + duration);
+  } catch (err) {
+    console.warn('Audio playback failed:', err);
+  }
+}
+
+function playPhaseSound(phase) {
+  if (!isSoundEnabled()) return;
+
+  switch (phase) {
+    case 'inhale':
+      // Rising tone - gentle, airy
+      playTone(280, 0.4, 'sine', 0.12);
+      setTimeout(() => playTone(350, 0.3, 'sine', 0.08), 150);
+      break;
+    case 'exhale':
+      // Falling tone - soft, releasing
+      playTone(320, 0.4, 'sine', 0.12);
+      setTimeout(() => playTone(260, 0.35, 'sine', 0.08), 150);
+      break;
+    case 'hold':
+      // Soft ping - gentle reminder
+      playTone(440, 0.15, 'sine', 0.08);
+      break;
+    case 'complete':
+      // Completion chime
+      playTone(523, 0.2, 'sine', 0.1);
+      setTimeout(() => playTone(659, 0.2, 'sine', 0.1), 150);
+      setTimeout(() => playTone(784, 0.4, 'sine', 0.12), 300);
+      break;
+  }
+}
 const DEFAULT_ROUTINES = [
   {
     id: crypto.randomUUID(),
@@ -215,7 +340,9 @@ const translations = {
     editRoutine: "Edit routine",
     nowPlaying: "Now playing",
     settingsToggle: "Settings",
-    settingsHide: "Hide settings"
+    settingsHide: "Hide settings",
+    haptics: "Haptics",
+    sound: "Sound"
   },
   es: {
     headerSubtitle: "Rutinas de respiración inspiradas en la tierra para enfoque, calma y recuperación.",
@@ -283,7 +410,9 @@ const translations = {
     editRoutine: "Editar rutina",
     nowPlaying: "En curso",
     settingsToggle: "Ajustes",
-    settingsHide: "Ocultar ajustes"
+    settingsHide: "Ocultar ajustes",
+    haptics: "Vibración",
+    sound: "Sonido"
   }
 };
 
@@ -444,6 +573,9 @@ function startCycle() {
   const routine = routines.find((item) => item.id === activeRoutineId);
   if (!routine || getRoutineCycles(routine).length === 0) return;
 
+  // Request wake lock to prevent screen from sleeping
+  requestWakeLock();
+
   updateMaxScaleCache();
   const cycles = getRoutineCycles(routine).filter((cycle) => cycle.steps && cycle.steps.length);
   if (cycles.length === 0) return;
@@ -453,14 +585,23 @@ function startCycle() {
   let repsLeft = animationState ? animationState.repsLeft : null;
   let inTransition = animationState ? animationState.inTransition : false;
   let transitionElapsed = animationState ? animationState.transitionElapsed : 0;
+  let currentPhase = animationState ? animationState.currentPhase : null;
   let lastTimestamp = null;
 
   if (repsLeft == null) {
     repsLeft = getCycleRepetitions(cycles[cycleIndex]);
   }
 
-  animationState = { running: true, cycleIndex, stepIndex, elapsed, repsLeft, inTransition, transitionElapsed };
+  animationState = { running: true, cycleIndex, stepIndex, elapsed, repsLeft, inTransition, transitionElapsed, currentPhase };
   updateControlButtons();
+
+  // Trigger initial phase feedback
+  const initialStep = cycles[cycleIndex].steps[stepIndex];
+  if (initialStep && initialStep.type !== currentPhase) {
+    animationState.currentPhase = initialStep.type;
+    triggerHaptic(initialStep.type === 'hold' ? 'light' : 'medium');
+    playPhaseSound(initialStep.type);
+  }
 
   function tick(timestamp) {
     if (!animationState || !animationState.running) return;
@@ -516,6 +657,13 @@ function startCycle() {
         }
       } else {
         step = activeCycle.steps[animationState.stepIndex];
+      }
+
+      // Trigger haptic and sound feedback on phase change
+      if (step.type !== animationState.currentPhase) {
+        animationState.currentPhase = step.type;
+        triggerHaptic(step.type === 'hold' ? 'light' : 'medium');
+        playPhaseSound(step.type);
       }
 
       // Check if transitioning from exhale to inhale
@@ -594,6 +742,7 @@ function resetCycle() {
   updateMaxScaleCache();
   updateNowPlaying();
   updateControlButtons();
+  releaseWakeLock();
 }
 
 function updateControlButtons() {
@@ -656,6 +805,11 @@ function finishSession() {
   holdCounter.textContent = "";
   updateNowPlaying();
   updateControlButtons();
+
+  // Release wake lock and play completion feedback
+  releaseWakeLock();
+  triggerHaptic('success');
+  playPhaseSound('complete');
 }
 
 function normalizeRoutine(routine) {
@@ -779,6 +933,30 @@ seedDataBtn.addEventListener("click", () => {
   saveRoutines();
   resetForm();
 });
+
+// Haptics and Sound toggles
+const hapticsToggle = document.getElementById("hapticsToggle");
+const soundToggle = document.getElementById("soundToggle");
+
+if (hapticsToggle) {
+  hapticsToggle.checked = isHapticsEnabled();
+  hapticsToggle.addEventListener("change", () => {
+    localStorage.setItem(HAPTICS_KEY, hapticsToggle.checked ? 'true' : 'false');
+    if (hapticsToggle.checked) {
+      triggerHaptic('light');
+    }
+  });
+}
+
+if (soundToggle) {
+  soundToggle.checked = isSoundEnabled();
+  soundToggle.addEventListener("change", () => {
+    localStorage.setItem(SOUND_KEY, soundToggle.checked ? 'true' : 'false');
+    if (soundToggle.checked) {
+      playTone(440, 0.15, 'sine', 0.1);
+    }
+  });
+}
 
 startBtn.addEventListener("click", startCycle);
 
