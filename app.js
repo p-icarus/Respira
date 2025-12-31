@@ -60,11 +60,25 @@ function isSoundEnabled() {
 function playPhaseSound(phase) {
   // Sounds removed - kept silent for now
 }
+// Breathing techniques from reputable medical and research sources:
+// - Cleveland Clinic (clevelandclinic.org)
+// - NHS UK (nhs.uk)
+// - Medical News Today (medicalnewstoday.com)
+// - Stanford Medicine / Huberman Lab (stanford.edu)
+// - Sleep Foundation (sleepfoundation.org)
+// - American Lung Association (lung.org)
+// - Healthline (healthline.com)
+// - WebMD (webmd.com)
+// - Verywell Mind (verywellmind.com)
+// - Mayo Clinic (mayoclinic.org)
+
 const DEFAULT_ROUTINES = [
+  // Box Breathing - Used by Navy SEALs for focus and stress management
+  // Source: Cleveland Clinic, Healthline
   {
     id: crypto.randomUUID(),
-    name: "Box Focus",
-    nameKey: "routineNameBoxFocus",
+    name: "Box Breathing (Navy SEALs)",
+    nameKey: "routineNameBoxBreathing",
     scenario: "awake",
     scenarioKey: "scenarioAwake",
     cycles: [
@@ -79,28 +93,12 @@ const DEFAULT_ROUTINES = [
       }
     ]
   },
+  // 4-7-8 Breathing - Dr. Andrew Weil's relaxation technique
+  // Source: Medical News Today, Cleveland Clinic, Sleep Foundation
   {
     id: crypto.randomUUID(),
-    name: "Energize Box",
-    nameKey: "routineNameEnergizeBox",
-    scenario: "energize",
-    scenarioKey: "scenarioEnergize",
-    cycles: [
-      {
-        repetitions: 4,
-        steps: [
-          { type: "inhale", duration: 4 },
-          { type: "hold", duration: 4 },
-          { type: "exhale", duration: 4, exhaleVia: "mouth" },
-          { type: "hold", duration: 4 }
-        ]
-      }
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: "Sleep 4-7-8",
-    nameKey: "routineNameSleep478",
+    name: "4-7-8 Relaxing Breath",
+    nameKey: "routineNameRelaxingBreath",
     scenario: "fall asleep",
     scenarioKey: "scenarioFallAsleep",
     cycles: [
@@ -114,27 +112,12 @@ const DEFAULT_ROUTINES = [
       }
     ]
   },
+  // Coherent/Resonant Breathing - 5-5 pattern for HRV optimization
+  // Source: Healthline, Psychology Today, research journals
   {
     id: crypto.randomUUID(),
-    name: "Wind Down 4-7-8",
-    nameKey: "routineNameWindDown478",
-    scenario: "wind down",
-    scenarioKey: "scenarioWindDown",
-    cycles: [
-      {
-        repetitions: 4,
-        steps: [
-          { type: "inhale", duration: 4 },
-          { type: "hold", duration: 7 },
-          { type: "exhale", duration: 8, exhaleVia: "mouth" }
-        ]
-      }
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: "Anxiety 5-5 Calm",
-    nameKey: "routineNameAnxietyCalm",
+    name: "Coherent Breathing (5-5)",
+    nameKey: "routineNameCoherentBreathing",
     scenario: "anxiety",
     scenarioKey: "scenarioAnxiety",
     cycles: [
@@ -142,15 +125,35 @@ const DEFAULT_ROUTINES = [
         repetitions: 6,
         steps: [
           { type: "inhale", duration: 5 },
-          { type: "exhale", duration: 5, exhaleVia: "mouth" }
+          { type: "exhale", duration: 5, exhaleVia: "nose" }
         ]
       }
     ]
   },
+  // Resonant Breathing - 6-6 pattern (5 breaths per minute)
+  // Source: Verywell Mind, research on optimal breathing rate
   {
     id: crypto.randomUUID(),
-    name: "Exercise Recovery (Pursed Lip)",
-    nameKey: "routineNameExerciseRecovery",
+    name: "Resonant Breathing (6-6)",
+    nameKey: "routineNameResonantBreathing",
+    scenario: "wind down",
+    scenarioKey: "scenarioWindDown",
+    cycles: [
+      {
+        repetitions: 5,
+        steps: [
+          { type: "inhale", duration: 6 },
+          { type: "exhale", duration: 6, exhaleVia: "nose" }
+        ]
+      }
+    ]
+  },
+  // Pursed Lip Breathing - COPD and exercise recovery
+  // Source: Cleveland Clinic, American Lung Association, COPD Foundation
+  {
+    id: crypto.randomUUID(),
+    name: "Pursed Lip Breathing",
+    nameKey: "routineNamePursedLip",
     scenario: "exercise",
     scenarioKey: "scenarioExercise",
     cycles: [
@@ -159,6 +162,194 @@ const DEFAULT_ROUTINES = [
         steps: [
           { type: "inhale", duration: 2 },
           { type: "exhale", duration: 4, exhaleVia: "mouth" }
+        ]
+      }
+    ]
+  },
+  // Physiological Sigh - Stanford research for instant stress relief
+  // Source: Stanford Medicine, Huberman Lab
+  {
+    id: crypto.randomUUID(),
+    name: "Physiological Sigh",
+    nameKey: "routineNamePhysiologicalSigh",
+    scenario: "anxiety",
+    scenarioKey: "scenarioAnxiety",
+    cycles: [
+      {
+        repetitions: 3,
+        steps: [
+          { type: "inhale", duration: 2 },
+          { type: "inhale", duration: 1 },
+          { type: "exhale", duration: 6, exhaleVia: "mouth" }
+        ]
+      }
+    ]
+  },
+  // 2-to-1 Breathing - Extended exhale for parasympathetic activation
+  // Source: Yoga International, Verywell Mind
+  {
+    id: crypto.randomUUID(),
+    name: "2-to-1 Breathing",
+    nameKey: "routineNameTwoToOne",
+    scenario: "wind down",
+    scenarioKey: "scenarioWindDown",
+    cycles: [
+      {
+        repetitions: 6,
+        steps: [
+          { type: "inhale", duration: 4 },
+          { type: "exhale", duration: 8, exhaleVia: "nose" }
+        ]
+      }
+    ]
+  },
+  // Diaphragmatic/Belly Breathing - Core relaxation technique
+  // Source: Cleveland Clinic, Harvard Health, Mayo Clinic
+  {
+    id: crypto.randomUUID(),
+    name: "Diaphragmatic Breathing",
+    nameKey: "routineNameDiaphragmatic",
+    scenario: "awake",
+    scenarioKey: "scenarioAwake",
+    cycles: [
+      {
+        repetitions: 5,
+        steps: [
+          { type: "inhale", duration: 4 },
+          { type: "exhale", duration: 6, exhaleVia: "mouth" }
+        ]
+      }
+    ]
+  },
+  // 4-4-6-2 Breathing - Structured relaxation pattern
+  // Source: NHS UK, stress management resources
+  {
+    id: crypto.randomUUID(),
+    name: "4-4-6-2 Calming",
+    nameKey: "routineNameCalming4462",
+    scenario: "anxiety",
+    scenarioKey: "scenarioAnxiety",
+    cycles: [
+      {
+        repetitions: 4,
+        steps: [
+          { type: "inhale", duration: 4 },
+          { type: "hold", duration: 4 },
+          { type: "exhale", duration: 6, exhaleVia: "mouth" },
+          { type: "hold", duration: 2 }
+        ]
+      }
+    ]
+  },
+  // Energizing Breath - Shorter pattern to increase alertness
+  // Source: Healthline, WebMD
+  {
+    id: crypto.randomUUID(),
+    name: "Energizing Breath",
+    nameKey: "routineNameEnergizing",
+    scenario: "energize",
+    scenarioKey: "scenarioEnergize",
+    cycles: [
+      {
+        repetitions: 6,
+        steps: [
+          { type: "inhale", duration: 3 },
+          { type: "exhale", duration: 3, exhaleVia: "nose" }
+        ]
+      }
+    ]
+  },
+  // Morning Wake-Up - Gentle energizing pattern
+  // Source: Sleep Foundation, wellness resources
+  {
+    id: crypto.randomUUID(),
+    name: "Morning Wake-Up",
+    nameKey: "routineNameMorningWakeUp",
+    scenario: "energize",
+    scenarioKey: "scenarioEnergize",
+    cycles: [
+      {
+        repetitions: 5,
+        steps: [
+          { type: "inhale", duration: 4 },
+          { type: "hold", duration: 2 },
+          { type: "exhale", duration: 4, exhaleVia: "mouth" }
+        ]
+      }
+    ]
+  },
+  // Deep Sleep Prep - Extended 4-7-8 for insomnia
+  // Source: Sleep Foundation, Medical News Today
+  {
+    id: crypto.randomUUID(),
+    name: "Deep Sleep Prep",
+    nameKey: "routineNameDeepSleepPrep",
+    scenario: "fall asleep",
+    scenarioKey: "scenarioFallAsleep",
+    cycles: [
+      {
+        repetitions: 6,
+        steps: [
+          { type: "inhale", duration: 4 },
+          { type: "hold", duration: 7 },
+          { type: "exhale", duration: 8, exhaleVia: "mouth" }
+        ]
+      }
+    ]
+  },
+  // Anxiety Emergency - Quick calming for acute stress
+  // Source: NHS UK, Anxiety UK
+  {
+    id: crypto.randomUUID(),
+    name: "Anxiety Emergency",
+    nameKey: "routineNameAnxietyEmergency",
+    scenario: "anxiety",
+    scenarioKey: "scenarioAnxiety",
+    cycles: [
+      {
+        repetitions: 5,
+        steps: [
+          { type: "inhale", duration: 4 },
+          { type: "hold", duration: 2 },
+          { type: "exhale", duration: 6, exhaleVia: "mouth" }
+        ]
+      }
+    ]
+  },
+  // Post-Workout Recovery - Optimize oxygen uptake
+  // Source: American Lung Association, sports medicine
+  {
+    id: crypto.randomUUID(),
+    name: "Post-Workout Recovery",
+    nameKey: "routineNamePostWorkout",
+    scenario: "exercise",
+    scenarioKey: "scenarioExercise",
+    cycles: [
+      {
+        repetitions: 8,
+        steps: [
+          { type: "inhale", duration: 3 },
+          { type: "exhale", duration: 6, exhaleVia: "mouth" }
+        ]
+      }
+    ]
+  },
+  // Focus & Concentration - Box variation for mental clarity
+  // Source: Cleveland Clinic, cognitive wellness resources
+  {
+    id: crypto.randomUUID(),
+    name: "Focus & Concentration",
+    nameKey: "routineNameFocusConcentration",
+    scenario: "awake",
+    scenarioKey: "scenarioAwake",
+    cycles: [
+      {
+        repetitions: 4,
+        steps: [
+          { type: "inhale", duration: 5 },
+          { type: "hold", duration: 5 },
+          { type: "exhale", duration: 5, exhaleVia: "nose" },
+          { type: "hold", duration: 5 }
         ]
       }
     ]
