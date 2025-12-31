@@ -432,6 +432,8 @@ function updateActiveRoutine() {
   updateNowPlaying();
 }
 
+const TRANSITION_DELAY = 1; // seconds between exhale and inhale
+
 function startCycle() {
   if (!activeRoutineId) {
     cyclePhase.textContent = t("selectRoutine");
@@ -449,13 +451,15 @@ function startCycle() {
   let stepIndex = animationState ? animationState.stepIndex : 0;
   let elapsed = animationState ? animationState.elapsed : 0;
   let repsLeft = animationState ? animationState.repsLeft : null;
+  let inTransition = animationState ? animationState.inTransition : false;
+  let transitionElapsed = animationState ? animationState.transitionElapsed : 0;
   let lastTimestamp = null;
 
   if (repsLeft == null) {
     repsLeft = getCycleRepetitions(cycles[cycleIndex]);
   }
 
-  animationState = { running: true, cycleIndex, stepIndex, elapsed, repsLeft };
+  animationState = { running: true, cycleIndex, stepIndex, elapsed, repsLeft, inTransition, transitionElapsed };
   updateControlButtons();
 
   function tick(timestamp) {
@@ -464,6 +468,20 @@ function startCycle() {
     const delta = (timestamp - lastTimestamp) / 1000;
     lastTimestamp = timestamp;
 
+    // Handle transition delay between exhale and inhale
+    if (animationState.inTransition) {
+      animationState.transitionElapsed += delta;
+      if (animationState.transitionElapsed >= TRANSITION_DELAY) {
+        animationState.inTransition = false;
+        animationState.transitionElapsed = 0;
+      } else {
+        // Render transition state (circle at rest position)
+        renderTransition(routine);
+        requestAnimationFrame(tick);
+        return;
+      }
+    }
+
     animationState.elapsed += delta;
     const activeCycle = cycles[animationState.cycleIndex];
     if (!activeCycle || !activeCycle.steps || activeCycle.steps.length === 0) {
@@ -471,6 +489,7 @@ function startCycle() {
       return;
     }
     let step = activeCycle.steps[animationState.stepIndex];
+    let previousStepType = step ? step.type : null;
 
     if (!step) {
       finishSession();
@@ -479,6 +498,7 @@ function startCycle() {
 
     if (animationState.elapsed >= step.duration) {
       animationState.elapsed = 0;
+      previousStepType = step.type;
       animationState.stepIndex += 1;
       if (animationState.stepIndex >= activeCycle.steps.length) {
         animationState.stepIndex = 0;
@@ -497,6 +517,15 @@ function startCycle() {
       } else {
         step = activeCycle.steps[animationState.stepIndex];
       }
+
+      // Check if transitioning from exhale to inhale
+      if (previousStepType === "exhale" && step.type === "inhale") {
+        animationState.inTransition = true;
+        animationState.transitionElapsed = 0;
+        renderTransition(routine);
+        requestAnimationFrame(tick);
+        return;
+      }
     }
 
     renderCycle(step, animationState.elapsed / step.duration, routine);
@@ -506,12 +535,32 @@ function startCycle() {
   requestAnimationFrame(tick);
 }
 
+function renderTransition(routine) {
+  circleShell.classList.remove("is-inhaling", "is-exhaling", "is-holding");
+  circleShell.classList.add("is-resting");
+  breathCircle.style.transform = "scale(1)";
+  cyclePhase.textContent = "...";
+  cycleMeta.textContent = t("routineMeta", { scenario: getRoutineScenario(routine) });
+  holdCounter.textContent = "";
+  updateNowPlaying("...");
+}
+
 function renderCycle(step, progress, routine) {
   const label = getStepLabel(step);
 
   cyclePhase.textContent = label;
   cycleMeta.textContent = t("routineMeta", { scenario: getRoutineScenario(routine) });
   updateNowPlaying(label);
+
+  // Update phase classes on circle shell
+  circleShell.classList.remove("is-inhaling", "is-exhaling", "is-holding", "is-resting");
+  if (step.type === "inhale") {
+    circleShell.classList.add("is-inhaling");
+  } else if (step.type === "exhale") {
+    circleShell.classList.add("is-exhaling");
+  } else if (step.type === "hold") {
+    circleShell.classList.add("is-holding");
+  }
 
   const maxScale = getMaxScale();
   let scale = 1;
@@ -524,7 +573,7 @@ function renderCycle(step, progress, routine) {
   }
 
   breathCircle.style.transform = `scale(${scale})`;
-  updateHoldCounter(step, progress);
+  updatePhaseCounter(step, progress);
 }
 
 function pauseCycle() {
@@ -538,6 +587,7 @@ function pauseCycle() {
 function resetCycle() {
   animationState = null;
   breathCircle.style.transform = "scale(1)";
+  circleShell.classList.remove("is-inhaling", "is-exhaling", "is-holding", "is-resting");
   cyclePhase.textContent = t("selectRoutine");
   cycleMeta.textContent = "";
   holdCounter.textContent = "";
@@ -585,18 +635,22 @@ function updateMaxScaleCache() {
   maxScaleCache = shellSize / coreSize;
 }
 
-function updateHoldCounter(step, progress) {
-  if (step.type !== "hold") {
+function updatePhaseCounter(step, progress) {
+  if (step.type === "hold") {
+    const remaining = Math.max(0, Math.ceil(step.duration - step.duration * progress));
+    holdCounter.textContent = remaining.toString();
+  } else if (step.type === "exhale") {
+    const remaining = Math.max(0, Math.ceil(step.duration - step.duration * progress));
+    holdCounter.textContent = remaining.toString();
+  } else {
     holdCounter.textContent = "";
-    return;
   }
-  const remaining = Math.max(0, Math.ceil(step.duration - step.duration * progress));
-  holdCounter.textContent = remaining.toString();
 }
 
 function finishSession() {
   if (!animationState) return;
   animationState.running = false;
+  circleShell.classList.remove("is-inhaling", "is-exhaling", "is-holding", "is-resting");
   cyclePhase.textContent = t("completed");
   cycleMeta.textContent = t("sessionComplete");
   holdCounter.textContent = "";
