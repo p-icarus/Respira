@@ -15,7 +15,7 @@
   <body>
     <div class="app">
       <header class="app-header">
-        <div>
+        <div class="brand">
           <h1>Respira</h1>
           <p data-i18n="headerSubtitle">Terra-inspired breathing routines for focus, calm, and recovery.</p>
         </div>
@@ -35,69 +35,92 @@
               <option value="es">Espanol</option>
             </select>
           </label>
-          <button id="newRoutineBtn" class="ghost" data-i18n="newRoutine">New routine</button>
           <button id="seedDataBtn" class="ghost" data-i18n="resetSamples">Reset samples</button>
         </div>
       </header>
 
-      <main class="layout">
-        <section class="panel panel-list">
-          <div class="panel-header">
-            <h2 data-i18n="routinesTitle">Routines</h2>
-            <span id="routineCount" class="muted"></span>
+      <main class="view-stack">
+        <section class="view view-routines is-active" data-view="routines">
+          <div class="panel">
+            <div class="panel-header">
+              <h2 data-i18n="routinesTitle">Routines</h2>
+              <span id="routineCount" class="muted"></span>
+            </div>
+            <div id="routineList" class="routine-list"></div>
           </div>
-          <div id="routineList" class="routine-list"></div>
         </section>
 
-        <section class="panel panel-visual">
-          <div class="panel-header">
-            <h2 data-i18n="breathingTitle">Breathing</h2>
-            <span id="activeRoutineName" class="muted" data-i18n="noRoutineSelected">No routine selected</span>
-          </div>
-          <div class="visual-wrap">
-            <div class="circle-shell" id="circleShell">
-              <div class="circle-core" id="breathCircle">
-                <span id="holdCounter" class="hold-counter"></span>
+        <section class="view view-breathing" data-view="breathing">
+          <div class="panel">
+            <div class="panel-header">
+              <h2 data-i18n="breathingTitle">Breathing</h2>
+              <span id="activeRoutineName" class="muted" data-i18n="noRoutineSelected">No routine selected</span>
+            </div>
+            <div class="visual-wrap">
+              <div class="circle-shell" id="circleShell">
+                <div class="circle-core" id="breathCircle">
+                  <span id="holdCounter" class="hold-counter"></span>
+                </div>
+              </div>
+              <div class="cycle-info">
+                <div id="cyclePhase" class="phase" data-i18n="selectRoutine">Select a routine to begin</div>
+                <div id="cycleMeta" class="muted"></div>
+              </div>
+              <div class="controls">
+                <button id="startBtn" class="primary" data-i18n="start">Start</button>
+                <button id="pauseBtn" class="ghost" data-i18n="pause">Pause</button>
+                <button id="resetBtn" class="ghost" data-i18n="reset">Reset</button>
               </div>
             </div>
-            <div class="cycle-info">
-              <div id="cyclePhase" class="phase" data-i18n="selectRoutine">Select a routine to begin</div>
-              <div id="cycleMeta" class="muted"></div>
-            </div>
-            <div class="controls">
-              <button id="startBtn" class="primary" data-i18n="start">Start</button>
-              <button id="pauseBtn" class="ghost" data-i18n="pause">Pause</button>
-              <button id="resetBtn" class="ghost" data-i18n="reset">Reset</button>
-            </div>
           </div>
         </section>
 
-        <section class="panel panel-editor">
-          <div class="panel-header">
-            <h2 data-i18n="builderTitle">Routine Builder</h2>
-            <span id="editorStatus" class="muted" data-i18n="newRoutineStatus">New routine</span>
+        <section class="view view-builder" data-view="builder">
+          <div class="panel">
+            <div class="panel-header">
+              <h2 data-i18n="builderTitle">Routine Builder</h2>
+              <span id="editorStatus" class="muted" data-i18n="newRoutineStatus">New routine</span>
+            </div>
+            <form id="routineForm" class="routine-form">
+              <label>
+                <span data-i18n="routineNameLabel">Routine name</span>
+                <input id="routineName" type="text" placeholder="Evening wind down" data-i18n-placeholder="routineNamePlaceholder" required />
+              </label>
+              <label>
+                <span data-i18n="scenarioLabel">Scenario</span>
+                <input id="routineScenario" type="text" placeholder="wind down" data-i18n-placeholder="scenarioPlaceholder" required />
+              </label>
+              <div class="steps-header">
+                <span data-i18n="stepsTitle">Steps</span>
+                <button type="button" id="addStepBtn" class="ghost" data-i18n="addCycle">Add cycle</button>
+              </div>
+              <div id="cyclesList" class="cycles-list"></div>
+              <div class="form-actions">
+                <button type="submit" class="primary" data-i18n="saveRoutine">Save routine</button>
+                <button type="button" id="deleteRoutineBtn" class="ghost" data-i18n="deleteRoutine">Delete routine</button>
+                <button type="button" id="newRoutineBtn" class="ghost" data-i18n="newRoutine">New routine</button>
+              </div>
+            </form>
           </div>
-          <form id="routineForm" class="routine-form">
-            <label>
-              <span data-i18n="routineNameLabel">Routine name</span>
-              <input id="routineName" type="text" placeholder="Evening wind down" data-i18n-placeholder="routineNamePlaceholder" required />
-            </label>
-            <label>
-              <span data-i18n="scenarioLabel">Scenario</span>
-              <input id="routineScenario" type="text" placeholder="wind down" data-i18n-placeholder="scenarioPlaceholder" required />
-            </label>
-            <div class="steps-header">
-              <span data-i18n="stepsTitle">Steps</span>
-              <button type="button" id="addStepBtn" class="ghost" data-i18n="addCycle">Add cycle</button>
-            </div>
-            <div id="cyclesList" class="cycles-list"></div>
-            <div class="form-actions">
-              <button type="submit" class="primary" data-i18n="saveRoutine">Save routine</button>
-              <button type="button" id="deleteRoutineBtn" class="ghost" data-i18n="deleteRoutine">Delete routine</button>
-            </div>
-          </form>
         </section>
       </main>
+
+      <nav class="bottom-nav" aria-label="Primary">
+        <button type="button" class="nav-item is-active" data-nav="routines" data-i18n="navRoutines">Routines</button>
+        <button type="button" class="nav-item" data-nav="breathing" data-i18n="navBreathing">Breathing</button>
+        <button type="button" class="nav-item" data-nav="builder" data-i18n="navBuilder">Builder</button>
+      </nav>
+      <div class="now-playing" id="nowPlaying">
+        <div>
+          <div class="now-label" data-i18n="nowPlaying">Now playing</div>
+          <div class="now-title" id="nowRoutineName">—</div>
+          <div class="now-phase" id="nowPhase">—</div>
+        </div>
+        <div class="now-actions">
+          <button type="button" class="ghost" id="nowToggleBtn" data-i18n="pause">Pause</button>
+          <button type="button" class="primary" id="nowOpenBtn" data-i18n="navBreathing">Breathing</button>
+        </div>
+      </div>
     </div>
 
     <template id="stepTemplate">

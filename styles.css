@@ -118,6 +118,9 @@ body {
   background: var(--card-bg);
   border-radius: var(--radius);
   box-shadow: 0 10px 25px var(--shadow);
+  position: sticky;
+  top: 16px;
+  z-index: 5;
 }
 
 h1,
@@ -140,8 +143,8 @@ p {
 }
 
 .layout {
-  display: grid;
-  grid-template-columns: 0.85fr 1fr 1.15fr;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
   flex: 1;
 }
@@ -235,6 +238,16 @@ button:hover {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.routine-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+}
+
+.routine-actions button {
+  flex: 1;
 }
 
 .tag {
@@ -397,13 +410,68 @@ select {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.view-stack {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.view {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateX(6%);
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  overflow-y: auto;
+  padding-bottom: 96px;
+}
+
+.view.is-active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  gap: 12px;
+  background: var(--card-bg);
+  border-radius: 999px;
+  padding: 10px;
+  box-shadow: 0 8px 18px var(--shadow);
+  position: sticky;
+  bottom: 16px;
+  z-index: 5;
+}
+
+.nav-item {
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.nav-item.is-active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 8px 16px rgba(31, 42, 31, 0.18);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 @media (max-width: 1100px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
   .circle-shell {
     width: 220px;
     height: 220px;
@@ -413,6 +481,7 @@ select {
 @media (max-width: 700px) {
   .app {
     padding: 16px;
+    gap: 16px;
   }
 
   .app-header {
@@ -432,5 +501,9 @@ select {
 
   .steps-labels {
     display: none;
+  }
+
+  .bottom-nav {
+    border-radius: 18px;
   }
 }

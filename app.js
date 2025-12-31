@@ -116,6 +116,8 @@ const stepTemplate = document.getElementById("stepTemplate");
 const cycleTemplate = document.getElementById("cycleTemplate");
 const themeSelect = document.getElementById("themeSelect");
 const languageSelect = document.getElementById("languageSelect");
+const viewStack = document.querySelector(".view-stack");
+const navItems = document.querySelectorAll(".nav-item");
 const addStepBtn = document.getElementById("addStepBtn");
 const deleteRoutineBtn = document.getElementById("deleteRoutineBtn");
 const newRoutineBtn = document.getElementById("newRoutineBtn");
@@ -197,7 +199,12 @@ const translations = {
     scenarioFallAsleep: "fall asleep",
     scenarioWindDown: "wind down",
     scenarioAnxiety: "anxiety",
-    scenarioExercise: "exercise"
+    scenarioExercise: "exercise",
+    navRoutines: "Routines",
+    navBreathing: "Breathing",
+    navBuilder: "Builder",
+    startRoutine: "Start routine",
+    editRoutine: "Edit routine"
   },
   es: {
     headerSubtitle: "Rutinas de respiración inspiradas en la tierra para enfoque, calma y recuperación.",
@@ -256,7 +263,12 @@ const translations = {
     scenarioFallAsleep: "dormir",
     scenarioWindDown: "relajación",
     scenarioAnxiety: "ansiedad",
-    scenarioExercise: "ejercicio"
+    scenarioExercise: "ejercicio",
+    navRoutines: "Rutinas",
+    navBreathing: "Respiración",
+    navBuilder: "Creador",
+    startRoutine: "Iniciar rutina",
+    editRoutine: "Editar rutina"
   }
 };
 
@@ -288,6 +300,7 @@ function renderRoutineList() {
     if (routine.id === activeRoutineId) {
       card.classList.add("active");
     }
+    card.dataset.routineId = routine.id;
 
     const title = document.createElement("strong");
     title.textContent = getRoutineName(routine);
@@ -313,14 +326,21 @@ function renderRoutineList() {
     card.appendChild(title);
     card.appendChild(scenario);
     card.appendChild(tagWrap);
-
-    card.addEventListener("click", () => {
-      activeRoutineId = routine.id;
-      editingRoutineId = routine.id;
-      renderRoutineList();
-      loadRoutineIntoForm(routine);
-      updateActiveRoutine();
-    });
+    const actions = document.createElement("div");
+    actions.className = "routine-actions";
+    const startButton = document.createElement("button");
+    startButton.type = "button";
+    startButton.className = "primary";
+    startButton.dataset.action = "start";
+    startButton.textContent = t("startRoutine");
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "ghost";
+    editButton.dataset.action = "edit";
+    editButton.textContent = t("editRoutine");
+    actions.appendChild(startButton);
+    actions.appendChild(editButton);
+    card.appendChild(actions);
 
     routineList.appendChild(card);
   });
@@ -640,6 +660,7 @@ newRoutineBtn.addEventListener("click", () => {
   activeRoutineId = null;
   renderRoutineList();
   updateActiveRoutine();
+  setActiveView("builder");
 });
 
 deleteRoutineBtn.addEventListener("click", () => {
@@ -665,12 +686,44 @@ pauseBtn.addEventListener("click", pauseCycle);
 
 resetBtn.addEventListener("click", resetCycle);
 
+routineList.addEventListener("click", (event) => {
+  const card = event.target.closest(".routine-card");
+  if (!card) return;
+  const routineId = card.dataset.routineId;
+  const routine = routines.find((item) => item.id === routineId);
+  if (!routine) return;
+
+  activeRoutineId = routine.id;
+  renderRoutineList();
+  updateActiveRoutine();
+
+  const action = event.target.dataset.action;
+  if (action === "start") {
+    setActiveView("breathing");
+    resetCycle();
+    startCycle();
+  } else if (action === "edit") {
+    editingRoutineId = routine.id;
+    loadRoutineIntoForm(routine);
+    setActiveView("builder");
+  } else {
+    setActiveView("breathing");
+  }
+});
+
+navItems.forEach((button) => {
+  button.addEventListener("click", () => {
+    setActiveView(button.dataset.nav);
+  });
+});
+
 applyTheme(loadTheme());
 applyTranslations(loadLanguage());
 resetForm();
 renderRoutineList();
 updateActiveRoutine();
 resetCycle();
+setActiveView("routines");
 
 window.addEventListener("resize", () => {
   maxScaleCache = null;
@@ -690,6 +743,17 @@ function applyTheme(theme) {
   const nextTheme = theme || "sage";
   document.body.dataset.theme = nextTheme;
   themeSelect.value = nextTheme;
+}
+
+function setActiveView(view) {
+  if (!viewStack) return;
+  const views = viewStack.querySelectorAll(".view");
+  views.forEach((section) => {
+    section.classList.toggle("is-active", section.dataset.view === view);
+  });
+  navItems.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.nav === view);
+  });
 }
 
 function loadTheme() {
