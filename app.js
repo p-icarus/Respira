@@ -807,10 +807,6 @@ function applyTranslations(lang) {
   if (languageSelect) {
     languageSelect.value = currentLang;
   }
-  if (settingsToggle) {
-    const isOpen = settingsPanel && !settingsPanel.hasAttribute("hidden");
-    settingsToggle.textContent = isOpen ? t("settingsHide") : t("settingsToggle");
-  }
   applyTranslationsTo(document);
   applyTranslationsTo(stepTemplate && stepTemplate.content);
   applyTranslationsTo(cycleTemplate && cycleTemplate.content);
@@ -895,12 +891,23 @@ if (languageSelect) {
 }
 
 if (settingsToggle && settingsPanel) {
-  settingsToggle.addEventListener("click", () => {
+  settingsToggle.addEventListener("click", (event) => {
+    event.stopPropagation();
     const isOpen = settingsPanel.classList.contains("is-open");
     if (isOpen) {
       closeSettingsPanel();
     } else {
       openSettingsPanel();
+    }
+  });
+
+  settingsPanel.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+
+  document.addEventListener("click", () => {
+    if (settingsPanel.classList.contains("is-open")) {
+      closeSettingsPanel();
     }
   });
 }
@@ -910,7 +917,6 @@ function closeSettingsPanel() {
   settingsPanel.classList.remove("is-open");
   settingsPanel.setAttribute("hidden", "");
   settingsToggle.setAttribute("aria-expanded", "false");
-  settingsToggle.textContent = t("settingsToggle");
 }
 
 function openSettingsPanel() {
@@ -918,5 +924,12 @@ function openSettingsPanel() {
   settingsPanel.classList.add("is-open");
   settingsPanel.removeAttribute("hidden");
   settingsToggle.setAttribute("aria-expanded", "true");
-  settingsToggle.textContent = t("settingsHide");
+  positionSettingsPanel();
+}
+
+function positionSettingsPanel() {
+  if (!settingsPanel || !settingsToggle) return;
+  const rect = settingsToggle.getBoundingClientRect();
+  settingsPanel.style.top = `${rect.bottom + 8}px`;
+  settingsPanel.style.right = `${window.innerWidth - rect.right}px`;
 }
