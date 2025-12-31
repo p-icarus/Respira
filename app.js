@@ -896,20 +896,27 @@ if (languageSelect) {
 
 if (settingsToggle && settingsPanel) {
   settingsToggle.addEventListener("click", () => {
-    const isOpen = settingsPanel.hasAttribute("hidden") === false;
+    const isOpen = settingsPanel.classList.contains("is-open");
     if (isOpen) {
       closeSettingsPanel();
     } else {
-      settingsPanel.removeAttribute("hidden");
-      settingsToggle.setAttribute("aria-expanded", "true");
-      settingsToggle.textContent = t("settingsHide");
+      openSettingsPanel();
     }
   });
 }
 
 function closeSettingsPanel() {
   if (!settingsPanel || !settingsToggle) return;
+  settingsPanel.classList.remove("is-open");
   settingsPanel.setAttribute("hidden", "");
   settingsToggle.setAttribute("aria-expanded", "false");
   settingsToggle.textContent = t("settingsToggle");
+}
+
+function openSettingsPanel() {
+  if (!settingsPanel || !settingsToggle) return;
+  settingsPanel.classList.add("is-open");
+  settingsPanel.removeAttribute("hidden");
+  settingsToggle.setAttribute("aria-expanded", "true");
+  settingsToggle.textContent = t("settingsHide");
 }

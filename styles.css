@@ -191,6 +191,14 @@ p {
   box-shadow: 0 8px 18px var(--shadow);
 }
 
+.settings-panel[hidden] {
+  display: none;
+}
+
+.settings-panel.is-open {
+  display: flex;
+}
+
 button {
   border: none;
   border-radius: 999px;
