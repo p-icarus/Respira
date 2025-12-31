@@ -118,6 +118,8 @@ const themeSelect = document.getElementById("themeSelect");
 const languageSelect = document.getElementById("languageSelect");
 const viewStack = document.querySelector(".view-stack");
 const navItems = document.querySelectorAll(".nav-item");
+const settingsToggle = document.getElementById("settingsToggle");
+const settingsPanel = document.getElementById("settingsPanel");
 const nowPlaying = document.getElementById("nowPlaying");
 const nowRoutineName = document.getElementById("nowRoutineName");
 const nowPhase = document.getElementById("nowPhase");
@@ -210,7 +212,9 @@ const translations = {
     navBuilder: "Builder",
     startRoutine: "Start routine",
     editRoutine: "Edit routine",
-    nowPlaying: "Now playing"
+    nowPlaying: "Now playing",
+    settingsToggle: "Settings",
+    settingsHide: "Hide settings"
   },
   es: {
     headerSubtitle: "Rutinas de respiración inspiradas en la tierra para enfoque, calma y recuperación.",
@@ -275,7 +279,9 @@ const translations = {
     navBuilder: "Creador",
     startRoutine: "Iniciar rutina",
     editRoutine: "Editar rutina",
-    nowPlaying: "En curso"
+    nowPlaying: "En curso",
+    settingsToggle: "Ajustes",
+    settingsHide: "Ocultar ajustes"
   }
 };
 
@@ -791,6 +797,7 @@ if (themeSelect) {
     const theme = themeSelect.value;
     localStorage.setItem(THEME_KEY, theme);
     applyTheme(theme);
+    closeSettingsPanel();
   });
 }
 
@@ -799,6 +806,10 @@ function applyTranslations(lang) {
   document.documentElement.lang = currentLang;
   if (languageSelect) {
     languageSelect.value = currentLang;
+  }
+  if (settingsToggle) {
+    const isOpen = settingsPanel && !settingsPanel.hasAttribute("hidden");
+    settingsToggle.textContent = isOpen ? t("settingsHide") : t("settingsToggle");
   }
   applyTranslationsTo(document);
   applyTranslationsTo(stepTemplate && stepTemplate.content);
@@ -879,5 +890,26 @@ if (languageSelect) {
     const lang = languageSelect.value;
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
+    closeSettingsPanel();
   });
+}
+
+if (settingsToggle && settingsPanel) {
+  settingsToggle.addEventListener("click", () => {
+    const isOpen = settingsPanel.hasAttribute("hidden") === false;
+    if (isOpen) {
+      closeSettingsPanel();
+    } else {
+      settingsPanel.removeAttribute("hidden");
+      settingsToggle.setAttribute("aria-expanded", "true");
+      settingsToggle.textContent = t("settingsHide");
+    }
+  });
+}
+
+function closeSettingsPanel() {
+  if (!settingsPanel || !settingsToggle) return;
+  settingsPanel.setAttribute("hidden", "");
+  settingsToggle.setAttribute("aria-expanded", "false");
+  settingsToggle.textContent = t("settingsToggle");
 }

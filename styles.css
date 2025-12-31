@@ -179,6 +179,18 @@ p {
   flex-wrap: wrap;
 }
 
+.settings-panel {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 10px 12px;
+  box-shadow: 0 8px 18px var(--shadow);
+}
+
 button {
   border: none;
   border-radius: 999px;
