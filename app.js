@@ -852,7 +852,7 @@ if ("serviceWorker" in navigator) {
 
 function applyTheme(theme) {
   if (!themeSelect) return;
-  const nextTheme = theme || "sage";
+  const nextTheme = theme || "twilight";
   document.body.dataset.theme = nextTheme;
   themeSelect.value = nextTheme;
 }
@@ -870,7 +870,7 @@ function setActiveView(view) {
 }
 
 function loadTheme() {
-  return localStorage.getItem(THEME_KEY) || "sage";
+  return localStorage.getItem(THEME_KEY) || "twilight";
 }
 
 if (themeSelect) {
