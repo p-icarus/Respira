@@ -850,27 +850,31 @@ select option {
   display: grid;
   grid-template-columns: 1fr 50px 1fr auto;
   gap: 6px;
-  align-items: center;
+  align-items: stretch;
 }
 
-.step-row select {
+.step-row select,
+.step-row input {
   padding: 8px 6px;
   font-size: 0.85rem;
   min-width: 0;
+  height: 38px;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .step-row input {
-  padding: 8px 4px;
-  font-size: 0.85rem;
   text-align: center;
   width: 100%;
-  min-width: 0;
 }
 
 .step-remove {
   padding: 8px 8px;
   font-size: 0.75rem;
   white-space: nowrap;
+  height: 38px;
+  box-sizing: border-box;
 }
 
 .form-actions {
@@ -1083,19 +1087,17 @@ select option {
     gap: 4px;
   }
 
-  .step-row select {
-    padding: 8px 4px;
-    font-size: 0.8rem;
-  }
-
+  .step-row select,
   .step-row input {
-    padding: 8px 2px;
+    padding: 6px 4px;
     font-size: 0.8rem;
+    height: 34px;
   }
 
   .step-remove {
     padding: 6px 6px;
     font-size: 0.7rem;
+    height: 34px;
   }
 
   .steps-labels {
