@@ -465,6 +465,46 @@ select {
   box-shadow: 0 8px 16px rgba(31, 42, 31, 0.18);
 }
 
+.now-playing {
+  position: sticky;
+  bottom: 90px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 12px 16px;
+  box-shadow: 0 10px 20px var(--shadow);
+  z-index: 4;
+}
+
+.now-playing.is-visible {
+  display: flex;
+}
+
+.now-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5b6b59;
+}
+
+.now-title {
+  font-weight: 600;
+}
+
+.now-phase {
+  font-size: 0.9rem;
+  color: #5b6b59;
+}
+
+.now-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .brand {
   display: flex;
   flex-direction: column;

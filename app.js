@@ -118,6 +118,11 @@ const themeSelect = document.getElementById("themeSelect");
 const languageSelect = document.getElementById("languageSelect");
 const viewStack = document.querySelector(".view-stack");
 const navItems = document.querySelectorAll(".nav-item");
+const nowPlaying = document.getElementById("nowPlaying");
+const nowRoutineName = document.getElementById("nowRoutineName");
+const nowPhase = document.getElementById("nowPhase");
+const nowToggleBtn = document.getElementById("nowToggleBtn");
+const nowOpenBtn = document.getElementById("nowOpenBtn");
 const addStepBtn = document.getElementById("addStepBtn");
 const deleteRoutineBtn = document.getElementById("deleteRoutineBtn");
 const newRoutineBtn = document.getElementById("newRoutineBtn");
@@ -204,7 +209,8 @@ const translations = {
     navBreathing: "Breathing",
     navBuilder: "Builder",
     startRoutine: "Start routine",
-    editRoutine: "Edit routine"
+    editRoutine: "Edit routine",
+    nowPlaying: "Now playing"
   },
   es: {
     headerSubtitle: "Rutinas de respiración inspiradas en la tierra para enfoque, calma y recuperación.",
@@ -268,7 +274,8 @@ const translations = {
     navBreathing: "Respiración",
     navBuilder: "Creador",
     startRoutine: "Iniciar rutina",
-    editRoutine: "Editar rutina"
+    editRoutine: "Editar rutina",
+    nowPlaying: "En curso"
   }
 };
 
@@ -410,9 +417,11 @@ function updateActiveRoutine() {
   const routine = routines.find((item) => item.id === activeRoutineId);
   if (!routine) {
     activeRoutineName.textContent = t("noRoutineSelected");
+    updateNowPlaying();
     return;
   }
   activeRoutineName.textContent = getRoutineName(routine);
+  updateNowPlaying();
 }
 
 function startCycle() {
@@ -493,6 +502,7 @@ function renderCycle(step, progress, routine) {
 
   cyclePhase.textContent = label;
   cycleMeta.textContent = t("routineMeta", { scenario: getRoutineScenario(routine) });
+  updateNowPlaying(label);
 
   const maxScale = getMaxScale();
   let scale = 1;
@@ -511,6 +521,7 @@ function renderCycle(step, progress, routine) {
 function pauseCycle() {
   if (animationState) {
     animationState.running = false;
+    updateNowPlaying();
   }
 }
 
@@ -521,6 +532,7 @@ function resetCycle() {
   cycleMeta.textContent = "";
   holdCounter.textContent = "";
   updateMaxScaleCache();
+  updateNowPlaying();
 }
 
 function getMaxScale() {
@@ -556,6 +568,7 @@ function finishSession() {
   cyclePhase.textContent = t("completed");
   cycleMeta.textContent = t("sessionComplete");
   holdCounter.textContent = "";
+  updateNowPlaying();
 }
 
 function normalizeRoutine(routine) {
@@ -686,6 +699,18 @@ pauseBtn.addEventListener("click", pauseCycle);
 
 resetBtn.addEventListener("click", resetCycle);
 
+nowToggleBtn.addEventListener("click", () => {
+  if (animationState && animationState.running) {
+    pauseCycle();
+  } else {
+    startCycle();
+  }
+});
+
+nowOpenBtn.addEventListener("click", () => {
+  setActiveView("breathing");
+});
+
 routineList.addEventListener("click", (event) => {
   const card = event.target.closest(".routine-card");
   if (!card) return;
@@ -754,6 +779,7 @@ function setActiveView(view) {
   navItems.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.nav === view);
   });
+  updateNowPlaying();
 }
 
 function loadTheme() {
@@ -826,6 +852,26 @@ function getRoutineName(routine) {
 
 function getRoutineScenario(routine) {
   return routine.scenarioKey ? t(routine.scenarioKey) : routine.scenario || "";
+}
+
+function updateNowPlaying(phase = null) {
+  if (!nowPlaying) return;
+  const routine = routines.find((item) => item.id === activeRoutineId);
+  const hasSession = Boolean(animationState);
+  if (!routine || !hasSession) {
+    nowPlaying.classList.remove("is-visible");
+    return;
+  }
+  nowRoutineName.textContent = getRoutineName(routine);
+  if (phase) {
+    nowPhase.textContent = phase;
+  } else if (animationState && animationState.running) {
+    nowPhase.textContent = cyclePhase.textContent;
+  } else {
+    nowPhase.textContent = t("pause");
+  }
+  nowToggleBtn.textContent = animationState.running ? t("pause") : t("start");
+  nowPlaying.classList.add("is-visible");
 }
 
 if (languageSelect) {

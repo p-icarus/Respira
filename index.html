@@ -20,22 +20,25 @@
           <p data-i18n="headerSubtitle">Terra-inspired breathing routines for focus, calm, and recovery.</p>
         </div>
         <div class="header-actions">
-          <label class="theme-select">
-            <span data-i18n="themeLabel">Theme</span>
-            <select id="themeSelect">
-              <option value="sage">Sage</option>
-              <option value="dune">Dune</option>
-              <option value="mist">Mist</option>
-            </select>
-          </label>
-          <label class="lang-select">
-            <span data-i18n="languageLabel">Language</span>
-            <select id="languageSelect">
-              <option value="en">English</option>
-              <option value="es">Espanol</option>
-            </select>
-          </label>
-          <button id="seedDataBtn" class="ghost" data-i18n="resetSamples">Reset samples</button>
+          <button id="settingsToggle" class="ghost" aria-expanded="false" data-i18n="settingsToggle">Settings</button>
+          <div id="settingsPanel" class="settings-panel" hidden>
+            <label class="theme-select">
+              <span data-i18n="themeLabel">Theme</span>
+              <select id="themeSelect">
+                <option value="sage">Sage</option>
+                <option value="dune">Dune</option>
+                <option value="mist">Mist</option>
+              </select>
+            </label>
+            <label class="lang-select">
+              <span data-i18n="languageLabel">Language</span>
+              <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="es">Espanol</option>
+              </select>
+            </label>
+            <button id="seedDataBtn" class="ghost" data-i18n="resetSamples">Reset samples</button>
+          </div>
         </div>
       </header>
 
