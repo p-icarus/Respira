@@ -756,15 +756,21 @@ select option {
 
 .step-row {
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) 70px minmax(110px, 1fr) auto;
+  grid-template-columns: minmax(100px, 1fr) 60px minmax(100px, 1fr) auto;
   gap: 8px;
   align-items: center;
 }
 
-.step-row select,
-.step-row input {
+.step-row select {
   padding: 10px 12px;
   font-size: 0.9rem;
+}
+
+.step-row input {
+  padding: 10px 8px;
+  font-size: 0.9rem;
+  text-align: center;
+  width: 60px;
 }
 
 .step-remove {
