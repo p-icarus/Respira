@@ -56,269 +56,9 @@ function isSoundEnabled() {
   return localStorage.getItem(SOUND_KEY) !== 'false';
 }
 
-// Audio context and ambient sounds
-let audioContext = null;
-let ambientSource = null;
-let ambientGain = null;
-
-function getAudioContext() {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioContext.state === 'suspended') {
-    audioContext.resume();
-  }
-  return audioContext;
-}
-
-// Generate brown noise (deeper, more soothing than white noise)
-function createBrownNoise(ctx) {
-  const bufferSize = 2 * ctx.sampleRate;
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const output = buffer.getChannelData(0);
-
-  let lastOut = 0.0;
-  for (let i = 0; i < bufferSize; i++) {
-    const white = Math.random() * 2 - 1;
-    output[i] = (lastOut + (0.02 * white)) / 1.02;
-    lastOut = output[i];
-    output[i] *= 3.5; // Boost volume
-  }
-
-  return buffer;
-}
-
-// Create rain-like sound with filtered noise
-function createRainSound(ctx, duration) {
-  const source = ctx.createBufferSource();
-  source.buffer = createBrownNoise(ctx);
-  source.loop = true;
-
-  // High-pass filter to create rain texture
-  const highpass = ctx.createBiquadFilter();
-  highpass.type = 'highpass';
-  highpass.frequency.value = 400;
-  highpass.Q.value = 0.5;
-
-  // Low-pass to soften
-  const lowpass = ctx.createBiquadFilter();
-  lowpass.type = 'lowpass';
-  lowpass.frequency.value = 8000;
-  lowpass.Q.value = 0.7;
-
-  // Gain for volume control
-  const gain = ctx.createGain();
-  gain.gain.value = 0;
-
-  source.connect(highpass);
-  highpass.connect(lowpass);
-  lowpass.connect(gain);
-  gain.connect(ctx.destination);
-
-  return { source, gain };
-}
-
-// Create flowing water/stream sound
-function createStreamSound(ctx) {
-  const source = ctx.createBufferSource();
-  source.buffer = createBrownNoise(ctx);
-  source.loop = true;
-
-  // Band-pass for water-like texture
-  const bandpass = ctx.createBiquadFilter();
-  bandpass.type = 'bandpass';
-  bandpass.frequency.value = 600;
-  bandpass.Q.value = 0.3;
-
-  // Add subtle modulation for flowing effect
-  const lfo = ctx.createOscillator();
-  const lfoGain = ctx.createGain();
-  lfo.frequency.value = 0.2; // Slow modulation
-  lfoGain.gain.value = 100;
-  lfo.connect(lfoGain);
-  lfoGain.connect(bandpass.frequency);
-  lfo.start();
-
-  // Main gain
-  const gain = ctx.createGain();
-  gain.gain.value = 0;
-
-  source.connect(bandpass);
-  bandpass.connect(gain);
-  gain.connect(ctx.destination);
-
-  return { source, gain, lfo };
-}
-
-// Create soft wind sound
-function createWindSound(ctx) {
-  const source = ctx.createBufferSource();
-  source.buffer = createBrownNoise(ctx);
-  source.loop = true;
-
-  // Very low frequency filtering for wind
-  const lowpass = ctx.createBiquadFilter();
-  lowpass.type = 'lowpass';
-  lowpass.frequency.value = 300;
-  lowpass.Q.value = 1;
-
-  // Slow modulation for gusts
-  const lfo = ctx.createOscillator();
-  const lfoGain = ctx.createGain();
-  lfo.frequency.value = 0.1;
-  lfoGain.gain.value = 150;
-  lfo.connect(lfoGain);
-  lfoGain.connect(lowpass.frequency);
-  lfo.start();
-
-  const gain = ctx.createGain();
-  gain.gain.value = 0;
-
-  source.connect(lowpass);
-  lowpass.connect(gain);
-  gain.connect(ctx.destination);
-
-  return { source, gain, lfo };
-}
-
-// Start ambient sound for breathing session
-function startAmbientSound() {
-  if (!isSoundEnabled()) return;
-
-  try {
-    const ctx = getAudioContext();
-
-    // Stop any existing ambient sound
-    stopAmbientSound();
-
-    // Create layered ambient soundscape
-    const rain = createRainSound(ctx);
-    const stream = createStreamSound(ctx);
-
-    rain.source.start();
-    stream.source.start();
-
-    // Fade in
-    const now = ctx.currentTime;
-    rain.gain.gain.setValueAtTime(0, now);
-    rain.gain.gain.linearRampToValueAtTime(0.15, now + 2);
-    stream.gain.gain.setValueAtTime(0, now);
-    stream.gain.gain.linearRampToValueAtTime(0.12, now + 2);
-
-    ambientSource = { rain, stream };
-    ambientGain = { rain: rain.gain, stream: stream.gain };
-  } catch (err) {
-    console.warn('Ambient sound failed:', err);
-  }
-}
-
-// Stop ambient sound with fade out
-function stopAmbientSound() {
-  if (!ambientSource) return;
-
-  try {
-    const ctx = getAudioContext();
-    const now = ctx.currentTime;
-
-    // Fade out
-    if (ambientGain) {
-      if (ambientGain.rain) {
-        ambientGain.rain.gain.linearRampToValueAtTime(0, now + 1);
-      }
-      if (ambientGain.stream) {
-        ambientGain.stream.gain.linearRampToValueAtTime(0, now + 1);
-      }
-    }
-
-    // Stop sources after fade
-    setTimeout(() => {
-      try {
-        if (ambientSource.rain) ambientSource.rain.source.stop();
-        if (ambientSource.stream) ambientSource.stream.source.stop();
-        if (ambientSource.rain?.lfo) ambientSource.rain.lfo.stop();
-        if (ambientSource.stream?.lfo) ambientSource.stream.lfo.stop();
-      } catch (e) {}
-      ambientSource = null;
-      ambientGain = null;
-    }, 1100);
-  } catch (err) {
-    console.warn('Error stopping ambient sound:', err);
-  }
-}
-
-// Modulate ambient sound based on breathing phase
-function modulateAmbientForPhase(phase) {
-  if (!isSoundEnabled() || !ambientGain) return;
-
-  try {
-    const ctx = getAudioContext();
-    const now = ctx.currentTime;
-
-    switch (phase) {
-      case 'inhale':
-        // Increase stream, soften rain - like drawing breath
-        ambientGain.stream.gain.linearRampToValueAtTime(0.18, now + 0.5);
-        ambientGain.rain.gain.linearRampToValueAtTime(0.1, now + 0.5);
-        break;
-      case 'exhale':
-        // Increase rain, soften stream - like releasing
-        ambientGain.rain.gain.linearRampToValueAtTime(0.2, now + 0.5);
-        ambientGain.stream.gain.linearRampToValueAtTime(0.08, now + 0.5);
-        break;
-      case 'hold':
-        // Balance both - calm stillness
-        ambientGain.rain.gain.linearRampToValueAtTime(0.12, now + 0.3);
-        ambientGain.stream.gain.linearRampToValueAtTime(0.12, now + 0.3);
-        break;
-    }
-  } catch (err) {
-    console.warn('Error modulating ambient sound:', err);
-  }
-}
-
-// Play a soft chime for session completion
-function playCompletionChime() {
-  if (!isSoundEnabled()) return;
-
-  try {
-    const ctx = getAudioContext();
-    const now = ctx.currentTime;
-
-    // Create a gentle bell-like tone
-    const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
-
-    frequencies.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      const startTime = now + (i * 0.2);
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(0.1, startTime + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 1.5);
-
-      osc.start(startTime);
-      osc.stop(startTime + 1.5);
-    });
-  } catch (err) {
-    console.warn('Completion chime failed:', err);
-  }
-}
-
+// Sound is disabled - no audio playback
 function playPhaseSound(phase) {
-  if (!isSoundEnabled()) return;
-
-  if (phase === 'complete') {
-    playCompletionChime();
-    stopAmbientSound();
-  } else {
-    modulateAmbientForPhase(phase);
-  }
+  // Sounds removed - kept silent for now
 }
 const DEFAULT_ROUTINES = [
   {
@@ -772,9 +512,6 @@ function startCycle() {
   // Request wake lock to prevent screen from sleeping
   requestWakeLock();
 
-  // Start ambient nature sounds
-  startAmbientSound();
-
   updateMaxScaleCache();
   const cycles = getRoutineCycles(routine).filter((cycle) => cycle.steps && cycle.steps.length);
   if (cycles.length === 0) return;
@@ -942,7 +679,6 @@ function resetCycle() {
   updateNowPlaying();
   updateControlButtons();
   releaseWakeLock();
-  stopAmbientSound();
 }
 
 function updateControlButtons() {
@@ -1152,10 +888,6 @@ if (soundToggle) {
   soundToggle.checked = isSoundEnabled();
   soundToggle.addEventListener("change", () => {
     localStorage.setItem(SOUND_KEY, soundToggle.checked ? 'true' : 'false');
-    if (soundToggle.checked) {
-      // Play a brief preview of the ambient sounds
-      playCompletionChime();
-    }
   });
 }
 
