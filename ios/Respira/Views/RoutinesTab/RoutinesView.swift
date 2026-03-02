@@ -46,10 +46,10 @@ private struct CategoryFolder: View {
     @Environment(BreathingEngine.self) private var engine
     @Environment(ThemeManager.self) private var theme
     @Environment(LocalizationManager.self) private var loc
-    @Binding var selectedTab: AppTab
 
     let category: RoutineCategory
     let routines: [BreathingRoutine]
+    @Binding var selectedTab: AppTab
     @State private var isExpanded = true
 
     var body: some View {
