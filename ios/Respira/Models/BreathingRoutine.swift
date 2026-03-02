@@ -148,16 +148,16 @@ struct BreathingRoutine: Codable, Identifiable, Equatable {
         self.cycles = cycles
     }
 
-    func localizedName(using t: (String) -> String) -> String {
+    func localizedName(using t: (_ key: String, _ vars: [String: String]) -> String) -> String {
         if let key = nameKey {
-            return t(key)
+            return t(key, [:])
         }
         return name
     }
 
-    func localizedScenario(using t: (String) -> String) -> String {
+    func localizedScenario(using t: (_ key: String, _ vars: [String: String]) -> String) -> String {
         if let key = scenarioKey {
-            return t(key)
+            return t(key, [:])
         }
         return scenario
     }
