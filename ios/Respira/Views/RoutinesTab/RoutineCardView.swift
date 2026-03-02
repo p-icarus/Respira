@@ -5,9 +5,8 @@ struct RoutineCardView: View {
     @Environment(BreathingEngine.self) private var engine
     @Environment(ThemeManager.self) private var theme
     @Environment(LocalizationManager.self) private var loc
-    @Binding var selectedTab: AppTab
-
     let routine: BreathingRoutine
+    @Binding var selectedTab: AppTab
 
     private var isActive: Bool {
         store.activeRoutineId == routine.id
